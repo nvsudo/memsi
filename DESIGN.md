@@ -1,7 +1,8 @@
-# Governed Personal Memory on Redis — Phase 1 Design
+# memsi: Design
 
-Status: phase 1 build started 2026-10-03 in ~/memsi (core, dev + Redis backends, dashboard inbox/digest/browse/timeline, memctl, MCP server, 18 tests). Connected to Redis Cloud 8.6.2 on 2026-10-03; seeded and benchmarked. Nightly export (launchd, 02:30, ~/.memsi/backups, keep 30) and Claude Code SessionStart hook + user-scope MCP registration installed 2026-10-03. Decisions: raw Redis 8 (JSON + Search + Streams), in-chat approval, local MCP for Claude Code + Claude Desktop, personal tool first.
+Living document: the *why* behind memsi. User stories, surfaces, data model, conflict semantics, measured behaviour and the decision log. Update it when a decision is made or reversed; put *how it is built* in [IMPLEMENTATION.md](IMPLEMENTATION.md) and *status* in [ROADMAP.md](ROADMAP.md).
 
+Last updated: 2026-10-03. Decisions so far: raw Redis 8 (JSON + Search + Streams) on Redis Cloud, in-chat approval, Claude Code + Claude Desktop first over local stdio MCP, Python, hash embedder now and bge-small next, personal tool first and demo-ready later.
 ## 1. What this is
 
 A governed memory layer, not a memory store. One Redis-backed MCP server that every AI client reads from on every session and proposes writes to. Writes land as `pending` and become `approved` only after the user says yes in-chat. Contradictions are surfaced, never silently overwritten.
