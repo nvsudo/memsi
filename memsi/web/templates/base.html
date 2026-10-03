@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>memsi · {{ owner }}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --bg:#0f1115; --panel:#171a21; --line:#262b35; --text:#e6e8ee; --muted:#8b93a7; --accent:#d82c20; --ok:#2fbf71; --warn:#e0a526; --info:#4c8dff; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background:var(--bg); color:var(--text); }
+  header { display:flex; align-items:center; gap:24px; padding:14px 28px; border-bottom:1px solid var(--line); background:var(--panel); position:sticky; top:0; z-index:2; }
+  header .brand { font-weight:700; letter-spacing:.3px; }
+  header .brand span { color:var(--accent); }
+  nav a { color:var(--muted); text-decoration:none; margin-right:18px; padding:6px 0; border-bottom:2px solid transparent; }
+  nav a.active, nav a:hover { color:var(--text); border-color:var(--accent); }
+  nav .badge { background:var(--accent); color:#fff; border-radius:10px; padding:0 7px; font-size:12px; margin-left:6px; }
+  main { max-width:1100px; margin:0 auto; padding:24px 28px 80px; }
+  h1 { font-size:22px; margin:0 0 6px; }
+  .sub { color:var(--muted); margin-bottom:22px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:18px 20px; margin-bottom:16px; }
+  .meta { color:var(--muted); font-size:13px; display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:6px; }
+  .chip { display:inline-block; border:1px solid var(--line); border-radius:6px; padding:1px 8px; font-size:12px; color:var(--muted); }
+  .chip.type { color:var(--info); border-color:#2a3a5c; }
+  .chip.sens-private { color:var(--accent); border-color:#5a2420; }
+  .chip.sens-internal { color:var(--warn); border-color:#5a4a20; }
+  .chip.sens-public { color:var(--ok); border-color:#1f4a33; }
+  .content { font-size:16px; }
+  .nb { margin-top:14px; border-top:1px dashed var(--line); padding-top:12px; }
+  .nb h4 { margin:0 0 8px; font-size:13px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; }
+  .nb .row { display:flex; gap:12px; align-items:flex-start; padding:8px 10px; border-radius:8px; background:#121419; margin-bottom:6px; }
+  .nb .row .sim { min-width:52px; font-variant-numeric:tabular-nums; color:var(--muted); font-size:13px; }
+  .rel { font-size:11px; padding:1px 6px; border-radius:4px; text-transform:uppercase; letter-spacing:.4px; }
+  .rel.duplicate { background:#3a2422; color:#ff8a80; }
+  .rel.possible_update { background:#3a3122; color:#ffd180; }
+  .rel.related { background:#22303a; color:#80c4ff; }
+  form.decide { margin-top:14px; display:grid; gap:10px; }
+  textarea, input[type=text], input[type=number], select { width:100%; background:#0f1115; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px 10px; font:inherit; }
+  textarea { min-height:60px; resize:vertical; }
+  .actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  button { font:inherit; border:1px solid var(--line); background:#1f242e; color:var(--text); padding:7px 14px; border-radius:8px; cursor:pointer; }
+  button.primary { background:var(--ok); border-color:var(--ok); color:#06130c; font-weight:600; }
+  button.danger { background:transparent; border-color:#5a2420; color:#ff8a80; }
+  button.warn { background:transparent; border-color:#5a4a20; color:#ffd180; }
+  .flash { background:#153726; border:1px solid #1f4a33; color:#9fe6bf; padding:10px 14px; border-radius:8px; margin-bottom:16px; }
+  .error { background:#3a1f1d; border:1px solid #5a2420; color:#ff9d94; padding:10px 14px; border-radius:8px; margin-bottom:16px; }
+  .empty { color:var(--muted); text-align:center; padding:50px 0; }
+  pre.digest { background:#0b0d11; border:1px solid var(--line); border-radius:10px; padding:18px 20px; white-space:pre-wrap; font:13.5px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--muted); font-weight:500; font-size:12px; text-transform:uppercase; letter-spacing:.5px; }
+  td.num { font-variant-numeric:tabular-nums; color:var(--muted); white-space:nowrap; }
+  .toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:end; margin-bottom:18px; }
+  .toolbar label { font-size:12px; color:var(--muted); display:block; margin-bottom:4px; }
+  .toolbar > div { min-width:140px; }
+  .stat { display:inline-block; margin-right:22px; }
+  .stat b { display:block; font-size:20px; }
+  .stat span { color:var(--muted); font-size:12px; }
+  details summary { cursor:pointer; color:var(--muted); }
+  .excluded { opacity:.6; }
+  code { font:12.5px ui-monospace, Menlo, monospace; color:var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">mem<span>si</span> · {{ owner }}</div>
+  <nav>
+    <a href="/inbox" class="{% if active=='inbox' %}active{% endif %}">Inbox{% if pending_count %}<span class="badge">{{ pending_count }}</span>{% endif %}</a>
+    <a href="/digest" class="{% if active=='digest' %}active{% endif %}">Digest preview</a>
+    <a href="/browse" class="{% if active=='browse' %}active{% endif %}">Browse</a>
+    <a href="/timeline" class="{% if active=='timeline' %}active{% endif %}">Timeline</a>
+  </nav>
+</header>
+<main>
+  {% if flash %}<div class="flash">{{ flash }}</div>{% endif %}
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
+  {% block body %}{% endblock %}
+</main>
+</body>
+</html>

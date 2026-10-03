@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "memsi-ui",
+      "runtimeExecutable": "./uvw",
+      "runtimeArgs": ["run", "memctl", "ui", "--port", "7677"],
+      "port": 7677
+    }
+  ]
+}

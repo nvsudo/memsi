@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Timeline</h1>
+<div class="sub">Every proposal and decision, newest first.</div>
+{% if not events %}<div class="empty">No events yet.</div>{% endif %}
+<table>
+  <tr><th>When</th><th>Event</th><th>Actor</th><th>Via</th><th>Memory</th><th>Details</th></tr>
+  {% for e in events %}
+  <tr>
+    <td class="num">{{ e.at_iso }}</td>
+    <td><span class="rel {{ 'duplicate' if e.kind in ['rejected','retracted','duplicate','expired'] else ('possible_update' if e.kind in ['superseded','edited','proposed'] else 'related') }}">{{ e.kind }}</span></td>
+    <td>{{ e.actor }}</td>
+    <td>{{ e.via or '' }}</td>
+    <td>{% set m = mems.get(e.memory_id) %}{% if m %}{{ m.content[:120] }} <code>{{ m.short_id }}</code>{% elif e.memory_id %}<code>{{ e.memory_id[-8:] }}</code>{% endif %}</td>
+    <td><code>{% for k, v in e.details.items() %}{% if v is not none and v != '' %}{{ k }}={{ v }} {% endif %}{% endfor %}</code></td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

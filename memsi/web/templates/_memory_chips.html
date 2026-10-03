@@ -1,0 +1,8 @@
+<span class="chip type">{{ m.type }}</span>
+<span class="chip">{{ m.scope }}</span>
+<span class="chip sens-{{ m.sensitivity }}">{{ m.sensitivity }}</span>
+{% if m.subject %}<span class="chip">subject: {{ m.subject }}</span>{% endif %}
+<span class="chip">{{ m.source.app }}{% if m.source.model %} · {{ m.source.model }}{% endif %}</span>
+<span class="chip">conf {{ '%.2f' % m.confidence }}</span>
+<span class="chip">{{ m.created_iso }}</span>
+<span class="chip"><code>{{ m.short_id }}</code></span>

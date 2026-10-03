@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Digest preview</h1>
+<div class="sub">Exactly what an assistant receives at session start. Scopes {{ digest.scopes|join(', ') }}, {{ digest.used_tokens }} of {{ digest.budget_tokens }} tokens used, {{ digest.included|length }} memories in, {{ digest.excluded|length }} cut by budget.</div>
+
+<form method="get" action="/digest" class="toolbar">
+  <div><label>Extra scope</label><input type="text" name="scope" value="{{ scope }}" placeholder="project:memsi"></div>
+  <div><label>Token budget</label><input type="number" name="budget" value="{{ budget }}" min="100" step="100"></div>
+  <div><label>As app (read filter)</label>
+    <select name="app_name">
+      <option value="">default (private)</option>
+      {% for a in apps %}<option value="{{ a }}" {% if a==app_name %}selected{% endif %}>{{ a }}</option>{% endfor %}
+    </select></div>
+  <div><button type="submit">Render</button></div>
+</form>
+
+<pre class="digest">{{ digest.text }}</pre>
+
+<h3>Ranking</h3>
+<table>
+  <tr><th>In</th><th>Score</th><th>Tokens</th><th>Type</th><th>Scope</th><th>Memory</th><th>Age</th></tr>
+  {% for i in digest.items %}
+  <tr class="{{ '' if i.included else 'excluded' }}">
+    <td>{{ '✓' if i.included else '—' }}</td>
+    <td class="num">{{ '%.2f' % i.score }}</td>
+    <td class="num">{{ i.tokens }}</td>
+    <td><span class="chip type">{{ i.memory.type }}</span></td>
+    <td><span class="chip">{{ i.memory.scope }}</span></td>
+    <td>{{ i.memory.content }} <code>{{ i.memory.short_id }}</code></td>
+    <td class="num">{{ i.memory.created_iso }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

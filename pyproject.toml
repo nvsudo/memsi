@@ -1,0 +1,38 @@
+[project]
+name = "memsi"
+version = "0.1.0"
+description = "Governed personal memory on Redis: every assistant reads, nothing is written without consent."
+requires-python = ">=3.12"
+dependencies = [
+  "redis>=6.0",
+  "numpy>=2.0",
+  "pydantic>=2.7",
+  "pyyaml>=6.0",
+  "typer>=0.12",
+  "fastapi>=0.115",
+  "uvicorn>=0.30",
+  "jinja2>=3.1",
+  "python-multipart>=0.0.9",
+  "httpx>=0.27",
+  "mcp>=1.2",
+]
+
+[project.optional-dependencies]
+semantic = ["sentence-transformers>=3.0"]
+
+[project.scripts]
+memctl = "memsi.cli:app"
+memsi-mcp = "memsi.mcp_server:main"
+
+[dependency-groups]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["memsi"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

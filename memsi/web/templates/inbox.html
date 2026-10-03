@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Inbox</h1>
+<div class="sub">
+  {{ items|length }} pending proposal{{ '' if items|length == 1 else 's' }}.
+  {% if clean_count %}{{ clean_count }} with no neighbours.
+  <form method="post" action="/inbox/approve-clean" style="display:inline"><button type="submit">Approve all clean ({{ clean_count }})</button></form>{% endif %}
+</div>
+
+{% if not items %}
+  <div class="empty">Nothing pending. Proposals from Claude Code, Claude Desktop and the CLI land here.</div>
+{% endif %}
+
+{% for item in items %}
+{% set m = item.memory %}
+<div class="card">
+  <div class="content">{{ m.content }}</div>
+  <div class="meta">{% include "_memory_chips.html" %}</div>
+
+  {% if item.neighbours %}
+  <div class="nb">
+    <h4>Neighbours in memory</h4>
+    {% for n in item.neighbours %}
+    <div class="row">
+      <div class="sim">{{ '%.2f' % n.similarity }}</div>
+      <div style="flex:1">
+        <div>{{ n.memory.content }}</div>
+        <div class="meta">
+          <span class="rel {{ n.relation }}">{{ n.relation.replace('_',' ') }}</span>
+          <span class="chip type">{{ n.memory.type }}</span>
+          <span class="chip">{{ n.memory.scope }}</span>
+          <span class="chip">{{ n.memory.status }}</span>
+          {% if n.memory.subject %}<span class="chip">subject: {{ n.memory.subject }}</span>{% endif %}
+          <span class="chip">{{ n.memory.created_iso }}</span>
+          <span class="chip"><code>{{ n.memory.short_id }}</code></span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <form class="decide" method="post" action="/inbox/{{ m.id }}/decide">
+    <details>
+      <summary>Edit before approving</summary>
+      <textarea name="content" placeholder="Leave empty to keep the text as proposed">{{ m.content }}</textarea>
+    </details>
+    <input type="text" name="quote" placeholder="Optional note recorded with your decision">
+    <div class="actions">
+      <button class="primary" name="action" value="approve">Approve</button>
+      {% if item.neighbours %}
+      <select name="supersedes_id" style="width:auto;max-width:420px">
+        <option value="">Replaces…</option>
+        {% for n in item.neighbours %}<option value="{{ n.memory.id }}">{{ n.memory.content[:80] }}</option>{% endfor %}
+      </select>
+      <button class="warn" name="action" value="supersede">Approve &amp; supersede selected</button>
+      {% endif %}
+      <button class="danger" name="action" value="reject">Reject</button>
+    </div>
+  </form>
+</div>
+{% endfor %}
+{% endblock %}

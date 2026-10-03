@@ -1,0 +1,7 @@
+#!/bin/sh
+# Wrapper so uv keeps everything inside the project (cache, python, venv).
+HERE="$(cd "$(dirname "$0")" && pwd)"
+export UV_CACHE_DIR="$HERE/.uv/cache"
+export UV_PYTHON_INSTALL_DIR="$HERE/.uv/python"
+export UV_PROJECT_ENVIRONMENT="$HERE/.venv"
+exec "$HERE/.tools/bin/uv" "$@"

@@ -1,0 +1,35 @@
+# memsi configuration. Env vars override: MEMSI_OWNER, REDIS_URL, MEMSI_BACKEND, MEMSI_EMBEDDER.
+owner: nik
+
+# backend: redis | memory   (memory = in-process dev backend persisted to .memsi/dev.json)
+backend: memory
+
+# embedder: hash | bge-small | ollama
+#   hash      : deterministic feature-hash embedding, no model download, dev/demo quality
+#   bge-small : BAAI/bge-small-en-v1.5 via sentence-transformers (pip install 'memsi[semantic]')
+#   ollama    : nomic-embed-text via a local Ollama daemon
+embedder: hash
+
+thresholds:
+  duplicate: 0.92
+  conflict_low: 0.75
+
+auto_approve:
+  - { type: preference, min_confidence: 0.9, sources: [claude-code], require_no_neighbours: true }
+  - { type: project,    min_confidence: 0.85, sources: [claude-code], require_no_neighbours: true }
+
+never_auto_approve_types: [identity, relationship]
+
+read_filters:
+  claude-code:    { sensitivity_max: private }
+  claude-desktop: { sensitivity_max: private }
+  dashboard:      { sensitivity_max: private }
+  chatgpt:        { sensitivity_max: internal }
+
+recall:
+  budget_tokens: 1500
+  always_scopes: [personal, work]
+  type_weights: { identity: 3, preference: 2, decision: 2, project: 1.5, fact: 1, procedure: 1, relationship: 1 }
+  recency_half_life_days: 60
+
+pending_expiry_days: 7

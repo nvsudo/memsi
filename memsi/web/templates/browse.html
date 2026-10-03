@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Browse</h1>
+<div class="sub">Search is semantic over approved memories; filters apply to the list.</div>
+<form method="get" action="/browse" class="toolbar">
+  <div style="flex:1;min-width:260px"><label>Search</label><input type="text" name="q" value="{{ q }}" placeholder="what do I prefer for…"></div>
+  <div><label>Status</label><select name="status">{% for s in ['approved','pending','superseded','rejected','retracted','expired',''] %}<option value="{{ s }}" {% if s==status %}selected{% endif %}>{{ s or 'any' }}</option>{% endfor %}</select></div>
+  <div><label>Scope</label><input type="text" name="scope" value="{{ scope }}" placeholder="work"></div>
+  <div><label>Type</label><select name="type"><option value="">any</option>{% for t in types %}<option value="{{ t }}" {% if t==type %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></div>
+  <div><button type="submit">Go</button></div>
+</form>
+
+{% if not rows %}<div class="empty">No memories match.</div>{% endif %}
+{% for m, sim in rows %}
+<div class="card">
+  <div class="content">{{ m.content }}</div>
+  <div class="meta">{% if sim is not none %}<span class="chip">sim {{ '%.2f' % sim }}</span>{% endif %}<span class="chip">{{ m.status }}</span>{% include "_memory_chips.html" %}
+    {% if m.approval %}<span class="chip">by {{ m.approval.by }}{% if m.approval.quote %}: “{{ m.approval.quote }}”{% endif %}</span>{% endif %}
+    {% if m.supersedes %}<span class="chip">supersedes {{ m.supersedes[-8:] }}</span>{% endif %}
+    {% if m.superseded_by %}<span class="chip">superseded by {{ m.superseded_by[-8:] }}</span>{% endif %}
+  </div>
+  {% if m.status in ['approved','pending'] %}
+  <details style="margin-top:10px"><summary>Edit / retract</summary>
+    <form method="post" action="/memory/{{ m.id }}/edit" class="decide">
+      <textarea name="content">{{ m.content }}</textarea>
+      <div class="toolbar">
+        <div><label>Type</label><select name="type">{% for t in types %}<option value="{{ t }}" {% if t==m.type %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></div>
+        <div><label>Scope</label><input type="text" name="scope" value="{{ m.scope }}"></div>
+        <div><label>Subject</label><input type="text" name="subject" value="{{ m.subject or '' }}"></div>
+        <div><label>Sensitivity</label><select name="sensitivity">{% for s in sensitivities %}<option value="{{ s }}" {% if s==m.sensitivity %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+        <div><button type="submit">Save</button></div>
+      </div>
+    </form>
+    <form method="post" action="/memory/{{ m.id }}/retract" class="actions" style="margin-top:8px">
+      <input type="text" name="reason" placeholder="Reason (optional)" style="max-width:360px">
+      <button class="danger" type="submit">Retract</button>
+    </form>
+  </details>
+  {% endif %}
+</div>
+{% endfor %}
+{% endblock %}
