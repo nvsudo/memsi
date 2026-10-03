@@ -23,6 +23,22 @@ cp .env.example .env       # paste REDIS_URL, set MEMSI_BACKEND=redis
 ./uvw run memctl seed
 ```
 
+## Claude Code
+
+```bash
+sh scripts/install-launchd.sh        # nightly export at 02:30 -> ~/.memsi/backups (--uninstall to remove)
+claude mcp add --scope user --env MEMSI_APP=claude-code -- memsi "$PWD/uvw" run --directory "$PWD" memsi-mcp
+```
+
+Then add the SessionStart hook to `~/.claude/settings.json` so every session starts with the digest:
+
+```json
+{ "hooks": { "SessionStart": [ { "matcher": "startup|resume|clear|compact",
+  "hooks": [ { "type": "command", "command": "/ABS/PATH/memsi/scripts/session-start.sh", "timeout": 20 } ] } ] } }
+```
+
+`scripts/session-start.sh` derives `project:<folder>` from the session cwd, calls `memctl recall`, and never blocks a session.
+
 ## MCP server
 
 `memsi-mcp` runs the stdio MCP server exposing `memory_recall`, `memory_search`, `memory_propose`, `memory_confirm`, `memory_retract`, `memory_pending`, `memory_audit`. Set `MEMSI_APP` per client so proposals carry their source.

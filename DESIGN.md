@@ -1,6 +1,6 @@
 # Governed Personal Memory on Redis — Phase 1 Design
 
-Status: phase 1 build started 2026-10-03 in ~/memsi (core, dev + Redis backends, dashboard inbox/digest/browse/timeline, memctl, MCP server, 18 tests). Connected to Redis Cloud 8.6.2 on 2026-10-03; seeded and benchmarked. Decisions: raw Redis 8 (JSON + Search + Streams), in-chat approval, local MCP for Claude Code + Claude Desktop, personal tool first.
+Status: phase 1 build started 2026-10-03 in ~/memsi (core, dev + Redis backends, dashboard inbox/digest/browse/timeline, memctl, MCP server, 18 tests). Connected to Redis Cloud 8.6.2 on 2026-10-03; seeded and benchmarked. Nightly export (launchd, 02:30, ~/.memsi/backups, keep 30) and Claude Code SessionStart hook + user-scope MCP registration installed 2026-10-03. Decisions: raw Redis 8 (JSON + Search + Streams), in-chat approval, local MCP for Claude Code + Claude Desktop, personal tool first.
 
 ## 1. What this is
 

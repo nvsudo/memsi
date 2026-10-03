@@ -276,7 +276,19 @@ class MemoryService:
         s["embedder"] = self.embedder.name
         s["dim"] = self.embedder.dim
         s["owner"] = self.settings.owner
+        s["last_export"] = self.last_export()
         return s
+
+    def last_export(self) -> Optional[str]:
+        from pathlib import Path
+
+        d = Path(self.settings.backups_dir).expanduser()
+        files = sorted(d.glob("memsi-*.json")) if d.exists() else []
+        if not files:
+            return None
+        from .models import iso
+
+        return f"{files[-1].name} ({iso(files[-1].stat().st_mtime)})"
 
     # ------------------------------------------------------- export/import
     def export_all(self) -> dict[str, Any]:

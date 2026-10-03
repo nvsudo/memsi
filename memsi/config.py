@@ -43,6 +43,7 @@ class Settings(BaseModel):
     redis_url: str = "redis://localhost:6379"
     embedder: str = "hash"  # hash | bge-small | ollama
     data_dir: Path = Path(".memsi")
+    backups_dir: Path = Path("~/.memsi/backups")
     thresholds: Thresholds = Field(default_factory=Thresholds)
     auto_approve: list[AutoApproveRule] = Field(default_factory=list)
     never_auto_approve_types: list[str] = Field(default_factory=lambda: ["identity", "relationship"])
