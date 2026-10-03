@@ -1,6 +1,6 @@
 # Governed Personal Memory on Redis — Phase 1 Design
 
-Status: phase 1 build started 2026-10-03 in ~/memsi (core, dev + Redis backends, dashboard inbox/digest/browse/timeline, memctl, MCP server, 18 tests). Awaiting Redis Cloud URL to exercise the Redis backend. Decisions: raw Redis 8 (JSON + Search + Streams), in-chat approval, local MCP for Claude Code + Claude Desktop, personal tool first.
+Status: phase 1 build started 2026-10-03 in ~/memsi (core, dev + Redis backends, dashboard inbox/digest/browse/timeline, memctl, MCP server, 18 tests). Connected to Redis Cloud 8.6.2 on 2026-10-03; seeded and benchmarked. Decisions: raw Redis 8 (JSON + Search + Streams), in-chat approval, local MCP for Claude Code + Claude Desktop, personal tool first.
 
 ## 1. What this is
 
@@ -238,25 +238,23 @@ Dashboard views:
 
 Rule: one write path. CLI, dashboard and MCP tools all call the same `propose` / `confirm` / `retract` / `edit` functions in core, so the audit log is complete regardless of entry point.
 
-## 10a. Latency budget, cloud vs local (estimates, same-metro region, warm connection)
+## 10a. Latency, measured (Redis Cloud free tier, Redis 8.6.2, laptop in Melbourne, 2026-10-03)
 
-| Step | Local Docker | Redis Cloud (Sydney from Sydney) | Redis Cloud (Sydney from Melbourne) |
-|---|---|---|---|
-| Embed one memory, bge-small in-process, warm | 10-30 ms | same | same |
-| Redis round trip | <1 ms | 5-15 ms | 15-30 ms |
-| FT.SEARCH execution on a few thousand vectors | 1-3 ms | same | same |
-| **recall** (1 search, or cache hit) | ~15-35 ms | ~25-50 ms | ~35-65 ms |
-| **search** (embed + 1 search) | ~15-35 ms | ~25-50 ms | ~35-65 ms |
-| **propose** (embed + search + JSON.SET + XADD, pipelined) | ~15-40 ms | ~35-80 ms | ~50-100 ms |
-| **confirm** (JSON.SET + XADD, pipelined) | ~1 ms | ~10-30 ms | ~20-60 ms |
-| Cold TLS connect (once per server process) | n/a | ~30-60 ms | ~60-120 ms |
-| Model turn that wraps any of the above | 2,000-20,000 ms | same | same |
+Measured with the hash embedder (embedding cost ~0 ms) so these are the pure Redis + network numbers. Median of 10, p90 in brackets.
 
-Rule of thumb: cloud adds 1-3 round trips per memory operation, i.e. 10-80 ms. Embedding costs about the same as one cloud round trip. The LLM turn is 50-500x larger. Cloud latency is invisible in interactive use.
+| Operation | Measured | Round trips today |
+|---|---|---|
+| ping | 5.8 ms (6.8) | 1 |
+| recall (digest, one FT.SEARCH) | 10.0 ms (11.3) | 1 |
+| search (one KNN FT.SEARCH) | 8.9 ms (11.7) | 1 |
+| propose (KNN + subject lookup + JSON.SET + XADD) | 24.3 ms (26.5) | 4, unpipelined |
+| confirm (JSON.GET + JSON.SET + XADD) | ~24 ms | 3, unpipelined |
 
-Where it is visible: bulk paths (export, import, re-embedding) if written as one command per record. Always pipeline those, or use `FT.SEARCH` with paging and `MGET`/`JSON.MGET` so N records cost ~N/100 round trips. The SessionStart hook sits on the critical path of starting a Claude Code session, so keep recall to one pipelined call and serve from the cached digest when nothing has changed.
+A semantic embedder adds 10-30 ms per embed on top of recall, search and propose. The LLM turn is seconds. Conclusion from the estimates holds: cloud latency is invisible in interactive use.
 
-Design rules that follow: one persistent connection per server process (no connect per call), pipeline every multi-command write, cache the recall digest in Redis with a short TTL, and keep the embedder loaded in memory for the life of the process (first embed after startup costs ~1-2 s to load the model).
+Cheap wins still open: pipeline the writes in propose and confirm (would take them to ~12 ms), and cache the digest with a short TTL so the SessionStart hook is a single GET on the hot path.
+
+Local Docker would be <1 ms per round trip; the difference per interaction is ~20 ms. Not worth the operational cost of running a second Redis.
 
 ## 11. Decisions and open items
 
