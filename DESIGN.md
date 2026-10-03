@@ -1,6 +1,6 @@
 # Governed Personal Memory on Redis — Phase 1 Design
 
-Status: draft, 2026-10-02. Decisions so far: raw Redis 8 (JSON + Search + Streams), in-chat approval, local MCP for Claude Code + Claude Desktop, personal tool first.
+Status: phase 1 build started 2026-10-03 in ~/memsi (core, dev + Redis backends, dashboard inbox/digest/browse/timeline, memctl, MCP server, 18 tests). Awaiting Redis Cloud URL to exercise the Redis backend. Decisions: raw Redis 8 (JSON + Search + Streams), in-chat approval, local MCP for Claude Code + Claude Desktop, personal tool first.
 
 ## 1. What this is
 
