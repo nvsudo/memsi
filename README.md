@@ -2,7 +2,7 @@
 
 **Governed personal memory on Redis.** Every AI assistant you use reads from one memory of record at the start of a session. Nothing is written to it without your consent. Contradictions are surfaced, never silently overwritten. You can see, correct and carry it anywhere.
 
-> Status: phase 1 (single owner, local clients) is running daily against Redis Cloud. See [ROADMAP.md](ROADMAP.md) for what is done and what is next.
+> Repository: https://github.com/nvsudo/memsi · Status: phase 1 (single owner, local clients) is running daily against Redis Cloud. See [ROADMAP.md](ROADMAP.md) for what is done and what is next.
 
 ## Why
 
