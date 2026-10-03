@@ -7,7 +7,10 @@ from __future__ import annotations
 import os
 from typing import Any, Optional
 
-from mcp.server.fastmcp import FastMCP
+try:  # mcp SDK 2.x
+    from mcp.server.mcpserver import MCPServer as _Server
+except ImportError:  # mcp SDK 1.x
+    from mcp.server.fastmcp import FastMCP as _Server
 
 from .core import MemoryError, MemoryService, get_service
 
@@ -22,7 +25,7 @@ INSTRUCTIONS = """memsi is the user's governed memory of record. Protocol:
 5. Never present a pending memory as fact. Never call memory_confirm without an explicit yes or no from the user in this conversation.
 6. If the user says a memory is wrong, call memory_retract."""
 
-mcp = FastMCP("memsi", instructions=INSTRUCTIONS)
+mcp = _Server("memsi", instructions=INSTRUCTIONS)
 _svc: Optional[MemoryService] = None
 
 
